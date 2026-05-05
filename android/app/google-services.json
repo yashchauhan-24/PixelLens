@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "214070854247",
+    "project_id": "camera-store-24",
+    "storage_bucket": "camera-store-24.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:214070854247:android:b61c4d3f3c0f269f62cac2",
+        "android_client_info": {
+          "package_name": "com.example.pixellens"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzgeS-CD-g5ZntZOpfuxjGUUyK34c_l3Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
