@@ -62,7 +62,7 @@ class _UserHomeViewState extends State<UserHomeView> {
                         crossAxisCount: 2,
                         mainAxisSpacing: 12,
                         crossAxisSpacing: 12,
-                        childAspectRatio: MediaQuery.sizeOf(context).width < 380 ? 0.58 : 0.64,
+                        childAspectRatio: MediaQuery.sizeOf(context).width < 380 ? 0.7 : 0.64,
                       ),
                       itemBuilder: (context, index) {
                         return _ProductCard(product: products[index]);
@@ -91,19 +91,22 @@ class _ProductCard extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final screenWidth = MediaQuery.sizeOf(context).width;
-            final spacing = screenWidth < 380 ? 8.0 : 10.0;
-            final buttonPadding = screenWidth < 380 ? 8.0 : 10.0;
+            final isNarrow = screenWidth < 380;
+            final cardPadding = isNarrow ? 6.0 : 8.0;
+            final nameFontSize = isNarrow ? 13.0 : 15.0;
+            final priceFontSize = isNarrow ? 14.0 : 16.0;
 
             return Stack(
               children: [
                 Padding(
-                  padding: EdgeInsets.all(spacing),
+                  padding: EdgeInsets.all(cardPadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.max,
                     children: [
+                      // Image - Keep exactly the same
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                         child: AspectRatio(
                           aspectRatio: 1,
                           child: Image.network(
@@ -111,32 +114,52 @@ class _ProductCard extends StatelessWidget {
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) => Container(
                               color: AppTheme.brown.withValues(alpha: 0.08),
-                              child: const Icon(Icons.camera_alt_outlined, size: 40, color: AppTheme.brown),
+                              child: const Icon(Icons.camera_alt_outlined, size: 36, color: AppTheme.brown),
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(height: spacing),
-                      Text(
-                        product.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 15),
+                      const SizedBox(height: 6),
+                      // Name and Price - Expanded to fill middle space
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                product.name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontSize: nameFontSize,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Rs ${product.price.toStringAsFixed(2)}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontSize: priceFontSize,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                          ],
+                        ),
                       ),
-                      SizedBox(height: spacing * 0.5),
-                      Text(
-                        'Rs ${product.price.toStringAsFixed(2)}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16),
-                      ),
-                      SizedBox(height: spacing),
+                      const SizedBox(height: 6),
+                      // Button - Full width and bigger
                       SizedBox(
                         width: double.infinity,
+                        height: 36,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(36),
-                            padding: EdgeInsets.symmetric(vertical: buttonPadding - 2),
+                            minimumSize: Size.zero,
+                            padding: EdgeInsets.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                           ),
                           onPressed: () {
@@ -150,14 +173,14 @@ class _ProductCard extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  right: 6,
-                  top: 6,
+                  right: 4,
+                  top: 4,
                   child: Card(
                     shape: const CircleBorder(),
                     child: Consumer<WishlistController>(
                       builder: (context, wishlist, _) => IconButton(
                         visualDensity: VisualDensity.compact,
-                        constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+                        constraints: const BoxConstraints.tightFor(width: 32, height: 32),
                         padding: EdgeInsets.zero,
                         onPressed: () => wishlist.toggle(product),
                         icon: Icon(

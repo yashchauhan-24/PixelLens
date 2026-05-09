@@ -45,15 +45,22 @@ class _CheckoutViewState extends State<CheckoutView> {
           ),
           const SizedBox(height: 18),
           Card(
-            child: RadioListTile<String>(
-              value: 'Cash on Delivery',
-              groupValue: _selectedPaymentMethod,
-              onChanged: (value) {
-                if (value == null) return;
-                setState(() => _selectedPaymentMethod = value);
-              },
+            child: ListTile(
+              onTap: () => setState(() => _selectedPaymentMethod = 'Cash on Delivery'),
               title: const Text('Cash on Delivery'),
               subtitle: const Text('Pay when your order is delivered.'),
+              trailing: Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
+                  color: _selectedPaymentMethod == 'Cash on Delivery' ? Theme.of(context).colorScheme.primary : Colors.transparent,
+                ),
+                child: _selectedPaymentMethod == 'Cash on Delivery'
+                    ? const Icon(Icons.check, size: 14, color: Colors.white)
+                    : null,
+              ),
             ),
           ),
           const SizedBox(height: 18),

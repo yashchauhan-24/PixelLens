@@ -210,26 +210,3 @@ class _LoginViewState extends State<LoginView> {
   }
 }
 
-class _CredentialChip extends StatelessWidget {
-  const _CredentialChip({required this.label, required this.email, required this.password});
-
-  final String label;
-  final String email;
-  final String password;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4ECE0),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Text(
-        '$label: $email / $password',
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-      ),
-    );
-  }
-}
