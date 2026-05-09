@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_routes.dart';
+import '../widgets/custom_bottom_nav_bar.dart';
 import 'admin_dashboard_view.dart';
 import 'manage_categories_view.dart';
 import 'manage_orders_view.dart';
@@ -37,9 +38,9 @@ class _AdminShellState extends State<AdminShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _index, children: _pages),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (value) {
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: _index,
+        onTap: (value) {
           final route = switch (value) {
             0 => AppRoutes.adminHome,
             1 => AppRoutes.adminCategories,
@@ -49,12 +50,12 @@ class _AdminShellState extends State<AdminShell> {
           };
           Navigator.pushReplacementNamed(context, route);
         },
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.space_dashboard_outlined), label: 'Dashboard'),
-          NavigationDestination(icon: Icon(Icons.sell_outlined), label: 'Brands'),
-          NavigationDestination(icon: Icon(Icons.camera_alt_outlined), label: 'Products'),
-          NavigationDestination(icon: Icon(Icons.receipt_long_outlined), label: 'Orders'),
-          NavigationDestination(icon: Icon(Icons.people_alt_outlined), label: 'Users'),
+        items: const [
+          BottomNavItem(icon: Icons.space_dashboard_outlined, label: 'Dashboard'),
+          BottomNavItem(icon: Icons.sell_outlined, label: 'Brands'),
+          BottomNavItem(icon: Icons.camera_alt_outlined, label: 'Products'),
+          BottomNavItem(icon: Icons.receipt_long_outlined, label: 'Orders'),
+          BottomNavItem(icon: Icons.people_alt_outlined, label: 'Users'),
         ],
       ),
     );

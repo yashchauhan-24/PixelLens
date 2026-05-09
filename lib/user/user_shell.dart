@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_routes.dart';
+import '../widgets/custom_bottom_nav_bar.dart';
 import 'cart_view.dart';
 import 'order_history_view.dart';
 import 'profile_view.dart';
@@ -35,9 +36,9 @@ class _UserShellState extends State<UserShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _index, children: _pages),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (value) {
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: _index,
+        onTap: (value) {
           final route = switch (value) {
             0 => AppRoutes.userHome,
             1 => AppRoutes.userCart,
@@ -46,11 +47,11 @@ class _UserShellState extends State<UserShell> {
           };
           Navigator.pushReplacementNamed(context, route);
         },
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.storefront_outlined), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.shopping_cart_outlined), label: 'Cart'),
-          NavigationDestination(icon: Icon(Icons.receipt_long_outlined), label: 'Orders'),
-          NavigationDestination(icon: Icon(Icons.person_outline), label: 'Profile'),
+        items: const [
+          BottomNavItem(icon: Icons.storefront_outlined, label: 'Home'),
+          BottomNavItem(icon: Icons.shopping_cart_outlined, label: 'Cart'),
+          BottomNavItem(icon: Icons.receipt_long_outlined, label: 'Orders'),
+          BottomNavItem(icon: Icons.person_outline, label: 'Profile'),
         ],
       ),
     );

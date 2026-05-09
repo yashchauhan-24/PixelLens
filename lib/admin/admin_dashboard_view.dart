@@ -17,6 +17,10 @@ class AdminDashboardView extends StatelessWidget {
     final categoryCount = context.watch<CategoryController>().categories.length;
     final orderCount = context.watch<OrderController>().orders.length;
     final userCount = context.watch<UserController>().users.length;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final horizontalPadding = 20.0;
+    final spacingForStats = 16.0;
+    final cardWidth = (screenWidth - horizontalPadding * 2 - spacingForStats) / 2;
 
     return Scaffold(
       appBar: AppBar(
@@ -34,81 +38,63 @@ class AdminDashboardView extends StatelessWidget {
             icon: const Icon(Icons.logout),
           ),        ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Text('Premium camera business insights', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 16,
-            runSpacing: 16,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(left: horizontalPadding, right: horizontalPadding, top: 20, bottom: MediaQuery.of(context).viewPadding.bottom + kBottomNavigationBarHeight + 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _StatCard(title: 'Brands', value: '$categoryCount', icon: Icons.sell_outlined),
-              _StatCard(title: 'Products', value: '$productCount', icon: Icons.camera_alt_rounded),
-              _StatCard(title: 'Orders', value: '$orderCount', icon: Icons.receipt_long_rounded),
-              _StatCard(title: 'Users', value: '$userCount', icon: Icons.people_alt_rounded),
-            ],
+              Text('Premium camera business insights', style: Theme.of(context).textTheme.headlineMedium),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: spacingForStats,
+                runSpacing: spacingForStats,
+                children: [
+                  SizedBox(width: cardWidth, child: _StatCard(title: 'Brands', value: '$categoryCount', icon: Icons.sell_outlined)),
+                  SizedBox(width: cardWidth, child: _StatCard(title: 'Products', value: '$productCount', icon: Icons.camera_alt_rounded)),
+                  SizedBox(width: cardWidth, child: _StatCard(title: 'Orders', value: '$orderCount', icon: Icons.receipt_long_rounded)),
+                  SizedBox(width: cardWidth, child: _StatCard(title: 'Users', value: '$userCount', icon: Icons.people_alt_rounded)),
+                ],
+              ),
+            const SizedBox(height: 24),
+            Text('Quick Actions', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                SizedBox(width: cardWidth, child: _ActionCard(
+                  title: 'Manage Brands',
+                  subtitle: 'Create and edit camera categories',
+                  icon: Icons.sell_outlined,
+                  onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.adminCategories),
+                )),
+                SizedBox(width: cardWidth, child: _ActionCard(
+                  title: 'Add Camera',
+                  subtitle: 'Create a new product entry',
+                  icon: Icons.add_circle_outline,
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.productForm),
+                )),
+                SizedBox(width: cardWidth, child: _ActionCard(
+                  title: 'Review Orders',
+                  subtitle: 'Track order statuses',
+                  icon: Icons.local_shipping_outlined,
+                  onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.adminOrders),
+                )),
+                SizedBox(width: cardWidth, child: _ActionCard(
+                  title: 'Manage Users',
+                  subtitle: 'View customer list',
+                  icon: Icons.people_outline,
+                  onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.adminUsers),
+                )),
+              ],
+            ),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
-          const SizedBox(height: 24),
-          Text('Quick Actions', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _ActionCard(
-                title: 'Manage Brands',
-                subtitle: 'Create and edit camera categories',
-                icon: Icons.sell_outlined,
-                onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.adminCategories),
-              ),
-              _ActionCard(
-                title: 'Add Camera',
-                subtitle: 'Create a new product entry',
-                icon: Icons.add_circle_outline,
-                onTap: () => Navigator.pushNamed(context, AppRoutes.productForm),
-              ),
-              _ActionCard(
-                title: 'Review Orders',
-                subtitle: 'Track order statuses',
-                icon: Icons.local_shipping_outlined,
-                onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.adminOrders),
-              ),
-              _ActionCard(
-                title: 'Manage Users',
-                subtitle: 'View customer list',
-                icon: Icons.people_outline,
-                onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.adminUsers),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          // Card(
-          //   child: Padding(
-          //     padding: const EdgeInsets.all(20),
-          //     child: Column(
-          //       crossAxisAlignment: CrossAxisAlignment.start,
-          //       // children: [
-          //       //   Text('Store Snapshot', style: Theme.of(context).textTheme.titleLarge),
-          //       //   const SizedBox(height: 8),
-          //       //   const Text('This local dummy setup is ready for Firebase replacement later through the service layer.'),
-          //       //   const SizedBox(height: 16),
-          //       //   Container(
-          //       //     width: double.infinity,
-          //       //     padding: const EdgeInsets.all(16),
-          //       //     decoration: BoxDecoration(
-          //       //       color: AppTheme.brown.withValues(alpha: 0.08),
-          //       //       borderRadius: BorderRadius.circular(18),
-          //       //     ),
-          //       //     child: const Text('Authenticated role-based routing is simulated with local credentials.'),
-          //       //   ),
-          //       // ],
-          //     ),
-          //   ),
-          // ),
-        ],
-      ),
-    );
+        ),
+      );
   }
 }
 
@@ -121,21 +107,19 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 180,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: AppTheme.brown),
-              const SizedBox(height: 16),
-              Text(value, style: Theme.of(context).textTheme.headlineMedium),
-              const SizedBox(height: 6),
-              Text(title, style: Theme.of(context).textTheme.bodyMedium),
-            ],
-          ),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: AppTheme.brown),
+            const SizedBox(height: 16),
+            Text(value, style: Theme.of(context).textTheme.headlineMedium),
+            const SizedBox(height: 6),
+            Text(title, style: Theme.of(context).textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ],
         ),
       ),
     );
@@ -152,24 +136,22 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 220,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(icon, color: AppTheme.brown, size: 30),
-                const SizedBox(height: 14),
-                Text(title, style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 4),
-                Text(subtitle),
-              ],
-            ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: AppTheme.brown, size: 30),
+              const SizedBox(height: 14),
+              Text(title, style: Theme.of(context).textTheme.titleLarge, maxLines: 2, overflow: TextOverflow.ellipsis),
+              const SizedBox(height: 4),
+              Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis),
+            ],
           ),
         ),
       ),

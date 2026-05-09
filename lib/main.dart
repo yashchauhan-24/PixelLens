@@ -10,10 +10,12 @@ import 'controllers/order_controller.dart';
 import 'controllers/product_controller.dart';
 import 'controllers/user_controller.dart';
 import 'controllers/wishlist_controller.dart';
+import 'controllers/review_controller.dart';
 import 'firebase_options.dart';
 import 'services/category_service.dart';
 import 'services/auth_service.dart';
 import 'services/firebase_bootstrap_service.dart';
+import 'services/review_service.dart';
 import 'services/order_service.dart';
 import 'services/product_service.dart';
 import 'services/user_service.dart';
@@ -37,6 +39,7 @@ class CameraSellingApp extends StatelessWidget {
     final authService = AuthService();
     final categoryService = CategoryService();
     final productService = ProductService();
+    final reviewService = ReviewService();
     final orderService = OrderService();
     final userService = UserService();
     final wishlistService = WishlistService();
@@ -51,6 +54,9 @@ class CameraSellingApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => ProductController(productService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ReviewController(reviewService),
         ),
         ChangeNotifierProvider(create: (_) => CartController()),
         ChangeNotifierProvider(

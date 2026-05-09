@@ -51,6 +51,9 @@ class FirebaseBootstrapService {
       await _seedProducts();
     }
 
+    // Backfill sample reviews for every product that has no reviews yet.
+    await _seedReviews();
+
     await _auth.signOut();
   }
 
@@ -129,6 +132,36 @@ class FirebaseBootstrapService {
 
     for (final product in products) {
       await _firestore.collection('products').doc(product.id).set(product.toMap());
+    }
+  }
+
+  static Future<void> _seedReviews() async {
+    final productSnapshot = await _firestore.collection('products').get();
+    for (final doc in productSnapshot.docs) {
+      final pid = doc.id;
+      final existing = await _firestore.collection('products').doc(pid).collection('reviews').limit(1).get();
+      if (existing.docs.isNotEmpty) continue;
+
+      final samples = [
+        {
+          'userId': 'seed-user-1',
+          'userName': 'Alice',
+          'rating': 5,
+          'comment': 'Excellent camera, superb image quality!',
+          'createdAt': DateTime.now().subtract(const Duration(days: 3)).toIso8601String(),
+        },
+        {
+          'userId': 'seed-user-2',
+          'userName': 'Bob',
+          'rating': 4,
+          'comment': 'Very good value for money.',
+          'createdAt': DateTime.now().subtract(const Duration(days: 10)).toIso8601String(),
+        },
+      ];
+
+      for (final s in samples) {
+        await _firestore.collection('products').doc(pid).collection('reviews').add(s);
+      }
     }
   }
 

@@ -8,6 +8,7 @@ import '../controllers/cart_controller.dart';
 import '../controllers/wishlist_controller.dart';
 import '../models/product.dart';
 import '../theme/app_theme.dart';
+import '../controllers/review_controller.dart';
 
 class UserHomeView extends StatefulWidget {
   const UserHomeView({super.key});
@@ -54,18 +55,23 @@ class _UserHomeViewState extends State<UserHomeView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              decoration: const InputDecoration(
-                hintText: 'Search cameras',
-                prefixIcon: Icon(Icons.search),
-              ),
-              onChanged: (value) => setState(() => _query = value),
-            ),
-            const SizedBox(height: 20),
-            Text('Explore by Brand', style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 12),
             SizedBox(
-              height: 56,
+              height: 44,
+              child: TextField(
+                onChanged: (value) => setState(() => _query = value),
+                decoration: const InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  hintText: 'Search cameras',
+                  prefixIcon: Icon(Icons.search, size: 20),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text('Explore by Brand', style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 44,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: categories.length + 1,
@@ -99,7 +105,8 @@ class _UserHomeViewState extends State<UserHomeView> {
                         crossAxisCount: 2,
                         mainAxisSpacing: 12,
                         crossAxisSpacing: 12,
-                        childAspectRatio: MediaQuery.sizeOf(context).width < 380 ? 0.7 : 0.64,
+                        // Lower ratio = taller card (prevents vertical overflow and looks closer to design)
+                        childAspectRatio: MediaQuery.sizeOf(context).width < 380 ? 0.60 : 0.56,
                       ),
                       itemBuilder: (context, index) {
                         return _ProductCard(product: products[index]);
@@ -129,7 +136,7 @@ class _CategoryChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             color: selected ? Colors.white : const Color(0xFFE8DCCF),
             borderRadius: BorderRadius.circular(18),
@@ -145,9 +152,10 @@ class _CategoryChip extends StatelessWidget {
           child: Center(
             child: Text(
               label,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppTheme.darkBrown,
                     fontWeight: FontWeight.w700,
+                    fontSize: 13,
                   ),
             ),
           ),
@@ -201,24 +209,69 @@ class _ProductCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      // Name and Price - Expanded to fill middle space
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Flexible(
-                              child: Text(
-                                product.name,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontSize: nameFontSize,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                              ),
+                            Text(
+                              product.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontSize: nameFontSize,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 6),
+                            // Rating row (styled like screenshot)
+                            Consumer<ReviewController>(builder: (context, reviews, _) {
+                              final summary = reviews.summaryFor(product.id);
+                              if (summary == null) {
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  if (context.mounted) context.read<ReviewController>().loadSummary(product.id);
+                                });
+                                return const SizedBox.shrink();
+                              }
+
+                              final avg = summary.average;
+                              final count = summary.count;
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Row(
+                                        children: List.generate(
+                                          5,
+                                          (i) => Icon(
+                                            i < avg.round() ? Icons.star : Icons.star_border,
+                                            size: 12,
+                                            color: Colors.amber,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        avg > 0 ? avg.toStringAsFixed(1) : '-',
+                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 12,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '(${count.toString()} ${count == 1 ? 'review' : 'reviews'})',
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: Colors.grey[600],
+                                          fontSize: 11,
+                                        ),
+                                  ),
+                                ],
+                              );
+                            }),
+                            const Spacer(),
                             Text(
                               'Rs ${product.price.toStringAsFixed(2)}',
                               maxLines: 1,
@@ -228,26 +281,25 @@ class _ProductCard extends StatelessWidget {
                                     fontWeight: FontWeight.w700,
                                   ),
                             ),
+                            const SizedBox(height: 6),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 38,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: Size.zero,
+                                  padding: EdgeInsets.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                                ),
+                                onPressed: () {
+                                  context.read<CartController>().addProduct(product);
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Added to cart')));
+                                },
+                                child: const Text('Add to Cart'),
+                              ),
+                            ),
                           ],
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      // Button - Full width and bigger
-                      SizedBox(
-                        width: double.infinity,
-                        height: 36,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: Size.zero,
-                            padding: EdgeInsets.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-                          ),
-                          onPressed: () {
-                            context.read<CartController>().addProduct(product);
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Added to cart')));
-                          },
-                          child: const Text('Add to Cart'),
                         ),
                       ),
                     ],
