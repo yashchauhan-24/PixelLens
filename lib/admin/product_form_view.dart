@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../controllers/category_controller.dart';
 import '../controllers/product_controller.dart';
 import '../models/product.dart';
 
@@ -19,6 +20,7 @@ class _ProductFormViewState extends State<ProductFormView> {
   late final TextEditingController _priceController;
   late final TextEditingController _descriptionController;
   late final TextEditingController _imageController;
+  String? _selectedCategoryId;
 
   @override
   void initState() {
@@ -27,6 +29,7 @@ class _ProductFormViewState extends State<ProductFormView> {
     _priceController = TextEditingController(text: widget.product?.price.toStringAsFixed(2) ?? '');
     _descriptionController = TextEditingController(text: widget.product?.description ?? '');
     _imageController = TextEditingController(text: widget.product?.image ?? '');
+    _selectedCategoryId = widget.product?.categoryId.isEmpty == true ? null : widget.product?.categoryId;
   }
 
   @override
@@ -41,6 +44,8 @@ class _ProductFormViewState extends State<ProductFormView> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.product != null;
+    final categories = context.watch<CategoryController>().categories;
+    final selectedCategoryId = categories.any((category) => category.id == _selectedCategoryId) ? _selectedCategoryId : null;
 
     return Scaffold(
       appBar: AppBar(title: Text(isEditing ? 'Update Camera' : 'Add Camera')),
@@ -76,6 +81,29 @@ class _ProductFormViewState extends State<ProductFormView> {
                 validator: (value) => value == null || value.trim().isEmpty ? 'Enter description' : null,
               ),
               const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: selectedCategoryId,
+                decoration: const InputDecoration(labelText: 'Brand / Category'),
+                items: categories
+                    .map(
+                      (category) => DropdownMenuItem<String>(
+                        value: category.id,
+                        child: Text(category.name),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) => setState(() => _selectedCategoryId = value),
+                validator: (value) {
+                  if (categories.isEmpty) {
+                    return 'Create a brand first';
+                  }
+                  if (value == null || value.isEmpty) {
+                    return 'Select a brand';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _imageController,
                 decoration: const InputDecoration(labelText: 'Image URL'),
@@ -95,6 +123,7 @@ class _ProductFormViewState extends State<ProductFormView> {
                     price: double.parse(_priceController.text.trim()),
                     description: _descriptionController.text.trim(),
                     image: _imageController.text.trim(),
+                    categoryId: _selectedCategoryId ?? '',
                   );
 
                   await context.read<ProductController>().saveProduct(product);

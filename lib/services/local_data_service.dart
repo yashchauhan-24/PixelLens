@@ -63,6 +63,7 @@ class LocalDataService {
         price: 1499.99,
         description: 'A compact full-frame mirrorless camera with fast autofocus and stunning video capability.',
         image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80',
+        categoryId: 'canon',
       ),
       const ProductModel(
         id: 'p-002',
@@ -70,6 +71,7 @@ class LocalDataService {
         price: 2499.00,
         description: 'Professional hybrid camera for creators who demand detail, speed, and reliable autofocus.',
         image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80',
+        categoryId: 'sony',
       ),
       const ProductModel(
         id: 'p-003',
@@ -77,6 +79,7 @@ class LocalDataService {
         price: 1899.00,
         description: 'Versatile full-frame system built for sharp stills, smooth performance, and durable handling.',
         image: 'https://images.unsplash.com/photo-1519421680037-a6d4e26f0b4f?auto=format&fit=crop&w=1200&q=80',
+        categoryId: 'nikon',
       ),
       const ProductModel(
         id: 'p-004',
@@ -84,6 +87,7 @@ class LocalDataService {
         price: 1699.00,
         description: 'Classic styling with a modern sensor, premium controls, and beautiful color rendering.',
         image: 'https://images.unsplash.com/photo-1516724562728-afc824a36e84?auto=format&fit=crop&w=1200&q=80',
+        categoryId: 'fujifilm',
       ),
     ]);
 
@@ -93,7 +97,14 @@ class LocalDataService {
         userId: 'u-001',
         products: const [
           CartItemModel(
-            product: ProductModel(id: 'p-001', name: 'Canon EOS R8', price: 1499.99, description: '', image: ''),
+            product: ProductModel(
+              id: 'p-001',
+              name: 'Canon EOS R8',
+              price: 1499.99,
+              description: '',
+              image: '',
+              categoryId: 'canon',
+            ),
             quantity: 1,
           ),
         ],

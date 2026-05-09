@@ -5,11 +5,13 @@ import 'package:provider/provider.dart';
 import 'app.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/cart_controller.dart';
+import 'controllers/category_controller.dart';
 import 'controllers/order_controller.dart';
 import 'controllers/product_controller.dart';
 import 'controllers/user_controller.dart';
 import 'controllers/wishlist_controller.dart';
 import 'firebase_options.dart';
+import 'services/category_service.dart';
 import 'services/auth_service.dart';
 import 'services/firebase_bootstrap_service.dart';
 import 'services/order_service.dart';
@@ -33,6 +35,7 @@ class CameraSellingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authService = AuthService();
+    final categoryService = CategoryService();
     final productService = ProductService();
     final orderService = OrderService();
     final userService = UserService();
@@ -42,6 +45,9 @@ class CameraSellingApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (_) => AuthController(authService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => CategoryController(categoryService),
         ),
         ChangeNotifierProvider(
           create: (_) => ProductController(productService),

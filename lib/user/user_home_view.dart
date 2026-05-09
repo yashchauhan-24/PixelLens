@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/app_routes.dart';
+import '../controllers/category_controller.dart';
 import '../controllers/product_controller.dart';
 import '../controllers/cart_controller.dart';
 import '../controllers/wishlist_controller.dart';
@@ -17,12 +18,25 @@ class UserHomeView extends StatefulWidget {
 
 class _UserHomeViewState extends State<UserHomeView> {
   String _query = '';
+  String _selectedCategoryId = 'all';
 
   @override
   Widget build(BuildContext context) {
+    final categories = context.watch<CategoryController>().categories;
+
+    if (_selectedCategoryId != 'all' && categories.every((category) => category.id != _selectedCategoryId)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => _selectedCategoryId = 'all');
+        }
+      });
+    }
+
     final products = context.watch<ProductController>().products.where((product) {
-      return product.name.toLowerCase().contains(_query.toLowerCase()) ||
+      final matchesQuery = product.name.toLowerCase().contains(_query.toLowerCase()) ||
           product.description.toLowerCase().contains(_query.toLowerCase());
+      final matchesCategory = _selectedCategoryId == 'all' || product.categoryId == _selectedCategoryId;
+      return matchesQuery && matchesCategory;
     }).toList();
 
     return Scaffold(
@@ -36,14 +50,10 @@ class _UserHomeViewState extends State<UserHomeView> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Premium camera collections', style: Theme.of(context).textTheme.headlineMedium),
-            const SizedBox(height: 8),
-            const Text('Discover high-end mirrorless and DSLR products with a clean, luxurious shopping flow.'),
-            const SizedBox(height: 18),
             TextField(
               decoration: const InputDecoration(
                 hintText: 'Search cameras',
@@ -51,10 +61,37 @@ class _UserHomeViewState extends State<UserHomeView> {
               ),
               onChanged: (value) => setState(() => _query = value),
             ),
+            const SizedBox(height: 20),
+            Text('Explore by Brand', style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 56,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: categories.length + 1,
+                separatorBuilder: (context, index) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return _CategoryChip(
+                      label: 'All',
+                      selected: _selectedCategoryId == 'all',
+                      onTap: () => setState(() => _selectedCategoryId = 'all'),
+                    );
+                  }
+
+                  final category = categories[index - 1];
+                  return _CategoryChip(
+                    label: category.name,
+                    selected: _selectedCategoryId == category.id,
+                    onTap: () => setState(() => _selectedCategoryId = category.id),
+                  );
+                },
+              ),
+            ),
             const SizedBox(height: 18),
             Expanded(
               child: products.isEmpty
-                  ? const Center(child: _EmptyState())
+                  ? _EmptyState(selectedCategoryId: _selectedCategoryId, query: _query)
                   : GridView.builder(
                       itemCount: products.length,
                       padding: const EdgeInsets.only(bottom: 8),
@@ -70,6 +107,50 @@ class _UserHomeViewState extends State<UserHomeView> {
                     ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({required this.label, required this.selected, required this.onTap});
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          decoration: BoxDecoration(
+            color: selected ? Colors.white : const Color(0xFFE8DCCF),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: selected ? AppTheme.brown : Colors.transparent),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.brown.withValues(alpha: selected ? 0.12 : 0.05),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.darkBrown,
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+          ),
         ),
       ),
     );
@@ -202,7 +283,10 @@ class _ProductCard extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  const _EmptyState({required this.selectedCategoryId, required this.query});
+
+  final String selectedCategoryId;
+  final String query;
 
   @override
   Widget build(BuildContext context) {
@@ -212,11 +296,16 @@ class _EmptyState extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
       ),
-      child: const Column(
+      child: Column(
         children: [
-          Icon(Icons.search_off_outlined, size: 44),
-          SizedBox(height: 12),
-          Text('No cameras match the current search.'),
+          const Icon(Icons.search_off_outlined, size: 44),
+          const SizedBox(height: 12),
+          Text(
+            selectedCategoryId == 'all' && query.isEmpty
+                ? 'No cameras available right now.'
+                : 'No cameras match the selected brand or search.',
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );

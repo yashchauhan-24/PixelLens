@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../models/category.dart';
 import '../models/cart_item.dart';
 import '../models/order.dart';
 import '../models/product.dart';
@@ -38,6 +39,11 @@ class FirebaseBootstrapService {
       await _seedOrders(user.id);
     } else {
       await _seedOrdersFromExistingUser();
+    }
+
+    final categoriesSnapshot = await _firestore.collection('categories').limit(1).get();
+    if (categoriesSnapshot.docs.isEmpty) {
+      await _seedCategories();
     }
 
     final productsSnapshot = await _firestore.collection('products').limit(1).get();
@@ -93,6 +99,7 @@ class FirebaseBootstrapService {
         price: 1499.99,
         description: 'A compact full-frame mirrorless camera with fast autofocus and stunning video capability.',
         image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80',
+        categoryId: 'canon',
       ),
       ProductModel(
         id: 'p-002',
@@ -100,6 +107,7 @@ class FirebaseBootstrapService {
         price: 2499.00,
         description: 'Professional hybrid camera for creators who demand detail, speed, and reliable autofocus.',
         image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80',
+        categoryId: 'sony',
       ),
       ProductModel(
         id: 'p-003',
@@ -107,6 +115,7 @@ class FirebaseBootstrapService {
         price: 1899.00,
         description: 'Versatile full-frame system built for sharp stills, smooth performance, and durable handling.',
         image: 'https://images.unsplash.com/photo-1519421680037-a6d4e26f0b4f?auto=format&fit=crop&w=1200&q=80',
+        categoryId: 'nikon',
       ),
       ProductModel(
         id: 'p-004',
@@ -114,11 +123,46 @@ class FirebaseBootstrapService {
         price: 1699.00,
         description: 'Classic styling with a modern sensor, premium controls, and beautiful color rendering.',
         image: 'https://images.unsplash.com/photo-1516724562728-afc824a36e84?auto=format&fit=crop&w=1200&q=80',
+        categoryId: 'fujifilm',
       ),
     ];
 
     for (final product in products) {
       await _firestore.collection('products').doc(product.id).set(product.toMap());
+    }
+  }
+
+  static Future<void> _seedCategories() async {
+    const categories = [
+      CategoryModel(
+        id: 'canon',
+        name: 'Canon',
+        description: 'EOS R and DSLR bodies for creators who want reliable autofocus.',
+      ),
+      CategoryModel(
+        id: 'sony',
+        name: 'Sony',
+        description: 'High-speed mirrorless cameras for hybrid photo and video work.',
+      ),
+      CategoryModel(
+        id: 'nikon',
+        name: 'Nikon',
+        description: 'Durable full-frame bodies with strong ergonomics and color depth.',
+      ),
+      CategoryModel(
+        id: 'fujifilm',
+        name: 'Fujifilm',
+        description: 'Stylish APS-C cameras with refined color science and tactile controls.',
+      ),
+      CategoryModel(
+        id: 'panasonic',
+        name: 'Panasonic',
+        description: 'Video-first mirrorless systems built for creators and filmmakers.',
+      ),
+    ];
+
+    for (final category in categories) {
+      await _firestore.collection('categories').doc(category.id).set(category.toMap());
     }
   }
 
@@ -134,6 +178,7 @@ class FirebaseBootstrapService {
             price: 1499.99,
             description: '',
             image: '',
+            categoryId: 'canon',
           ),
           quantity: 1,
         ),

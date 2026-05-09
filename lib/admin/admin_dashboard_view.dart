@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/app_routes.dart';
 import '../controllers/auth_controller.dart';
+import '../controllers/category_controller.dart';
 import '../controllers/order_controller.dart';
 import '../controllers/product_controller.dart';
 import '../controllers/user_controller.dart';
@@ -13,6 +14,7 @@ class AdminDashboardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final productCount = context.watch<ProductController>().products.length;
+    final categoryCount = context.watch<CategoryController>().categories.length;
     final orderCount = context.watch<OrderController>().orders.length;
     final userCount = context.watch<UserController>().users.length;
 
@@ -41,6 +43,7 @@ class AdminDashboardView extends StatelessWidget {
             spacing: 16,
             runSpacing: 16,
             children: [
+              _StatCard(title: 'Brands', value: '$categoryCount', icon: Icons.sell_outlined),
               _StatCard(title: 'Products', value: '$productCount', icon: Icons.camera_alt_rounded),
               _StatCard(title: 'Orders', value: '$orderCount', icon: Icons.receipt_long_rounded),
               _StatCard(title: 'Users', value: '$userCount', icon: Icons.people_alt_rounded),
@@ -53,6 +56,12 @@ class AdminDashboardView extends StatelessWidget {
             spacing: 12,
             runSpacing: 12,
             children: [
+              _ActionCard(
+                title: 'Manage Brands',
+                subtitle: 'Create and edit camera categories',
+                icon: Icons.sell_outlined,
+                onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.adminCategories),
+              ),
               _ActionCard(
                 title: 'Add Camera',
                 subtitle: 'Create a new product entry',

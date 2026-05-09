@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'admin/admin_shell.dart';
+import 'admin/category_form_view.dart';
 import 'admin/product_form_view.dart';
 import 'constants/app_routes.dart';
+import 'models/category.dart';
 import 'models/product.dart';
 import 'models/order.dart';
 import 'user/checkout_view.dart';
@@ -29,12 +31,14 @@ class App extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const RegisterView(), settings: settings);
           case AppRoutes.adminHome:
             return MaterialPageRoute(builder: (_) => const AdminShell(), settings: settings);
-          case AppRoutes.adminProducts:
+          case AppRoutes.adminCategories:
             return MaterialPageRoute(builder: (_) => const AdminShell(initialIndex: 1), settings: settings);
-          case AppRoutes.adminOrders:
+          case AppRoutes.adminProducts:
             return MaterialPageRoute(builder: (_) => const AdminShell(initialIndex: 2), settings: settings);
-          case AppRoutes.adminUsers:
+          case AppRoutes.adminOrders:
             return MaterialPageRoute(builder: (_) => const AdminShell(initialIndex: 3), settings: settings);
+          case AppRoutes.adminUsers:
+            return MaterialPageRoute(builder: (_) => const AdminShell(initialIndex: 4), settings: settings);
           case AppRoutes.userHome:
             return MaterialPageRoute(builder: (_) => const UserShell(), settings: settings);
           case AppRoutes.userCart:
@@ -70,6 +74,13 @@ class App extends StatelessWidget {
           case AppRoutes.editProductForm:
             return MaterialPageRoute(
               builder: (_) => ProductFormView(product: settings.arguments as ProductModel),
+              settings: settings,
+            );
+          case AppRoutes.categoryForm:
+            return MaterialPageRoute(builder: (_) => const CategoryFormView(), settings: settings);
+          case AppRoutes.editCategoryForm:
+            return MaterialPageRoute(
+              builder: (_) => CategoryFormView(category: settings.arguments as CategoryModel),
               settings: settings,
             );
           default:

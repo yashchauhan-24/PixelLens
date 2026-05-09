@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/app_routes.dart';
+import '../controllers/category_controller.dart';
 import '../controllers/product_controller.dart';
 import '../theme/app_theme.dart';
 
@@ -11,6 +12,7 @@ class ManageProductsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final products = context.watch<ProductController>().products;
+    final categories = context.watch<CategoryController>().categories;
 
     return Scaffold(
       appBar: AppBar(
@@ -46,7 +48,9 @@ class ManageProductsView extends StatelessWidget {
                 ),
               ),
               title: Text(product.name),
-              subtitle: Text('Rs ${product.price.toStringAsFixed(2)}'),
+              subtitle: Text(
+                '${categories.where((category) => category.id == product.categoryId).map((category) => category.name).firstOrNull ?? 'Unassigned'} • Rs ${product.price.toStringAsFixed(2)}',
+              ),
               trailing: Wrap(
                 spacing: 8,
                 children: [
