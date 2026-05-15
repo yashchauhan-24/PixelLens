@@ -16,22 +16,17 @@ class CategoryFormView extends StatefulWidget {
 class _CategoryFormViewState extends State<CategoryFormView> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
-  late final TextEditingController _imageController;
-  late final TextEditingController _descriptionController;
+  
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.category?.name ?? '');
-    _imageController = TextEditingController(text: widget.category?.imageUrl ?? '');
-    _descriptionController = TextEditingController(text: widget.category?.description ?? '');
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _imageController.dispose();
-    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -54,16 +49,7 @@ class _CategoryFormViewState extends State<CategoryFormView> {
                 validator: (value) => value == null || value.trim().isEmpty ? 'Enter brand name' : null,
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _imageController,
-                decoration: const InputDecoration(labelText: 'Image URL (optional)'),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                maxLines: 4,
-                decoration: const InputDecoration(labelText: 'Description (optional)'),
-              ),
+              // Removed Image URL and Description fields — only brand name is editable.
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
@@ -75,8 +61,8 @@ class _CategoryFormViewState extends State<CategoryFormView> {
                   final category = CategoryModel(
                     id: widget.category?.id ?? 'c-${DateTime.now().millisecondsSinceEpoch}',
                     name: _nameController.text.trim(),
-                    imageUrl: _imageController.text.trim(),
-                    description: _descriptionController.text.trim(),
+                    imageUrl: widget.category?.imageUrl ?? '',
+                    description: widget.category?.description ?? '',
                   );
                   await context.read<CategoryController>().saveCategory(category);
                   if (!navigator.mounted) return;

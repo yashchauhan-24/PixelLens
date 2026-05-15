@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -11,6 +12,7 @@ class AuthService {
 
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: const ['email']);
 
   CollectionReference<Map<String, dynamic>> get _users => _firestore.collection('users');
 
@@ -62,8 +64,15 @@ class AuthService {
 
   Future<AppUser?> signInWithGoogle() async {
     try {
-      final googleSignIn = GoogleSignIn();
-      final account = await googleSignIn.signIn();
+      if (kIsWeb) {
+        final provider = GoogleAuthProvider()..addScope('email');
+        final userCred = await _auth.signInWithPopup(provider);
+        final user = userCred.user;
+        if (user == null) return null;
+        return _syncGoogleUser(user);
+      }
+
+      final account = await _googleSignIn.signIn();
       if (account == null) return null;
 
       final auth = await account.authentication;
@@ -73,7 +82,9 @@ class AuthService {
       );
 
       final userCred = await _auth.signInWithCredential(credential);
-      return await _fetchUserByUid(userCred.user!.uid);
+      final user = userCred.user;
+      if (user == null) return null;
+      return _syncGoogleUser(user);
     } on FirebaseAuthException catch (e) {
       throw Exception(_friendlyAuthMessage(e));
     } catch (_) {
@@ -81,7 +92,12 @@ class AuthService {
     }
   }
 
-  Future<void> logout() => _auth.signOut();
+  Future<void> logout() async {
+    await _auth.signOut();
+    if (!kIsWeb) {
+      await _googleSignIn.signOut();
+    }
+  }
 
   Future<AppUser?> fetchCurrentUser() async {
     final currentUser = _auth.currentUser;
@@ -151,6 +167,19 @@ class AuthService {
       address: data['address'] as String?,
       profileImage: data['profileImage'] as String?,
     );
+  }
+
+  Future<AppUser> _syncGoogleUser(User authUser) async {
+    final user = AppUser(
+      id: authUser.uid,
+      name: authUser.displayName ?? authUser.email?.split('@').first ?? 'User',
+      email: authUser.email ?? '',
+      role: UserRole.user,
+      profileImage: authUser.photoURL,
+    );
+
+    await _users.doc(authUser.uid).set(user.toMap(), SetOptions(merge: true));
+    return user;
   }
 
   String _friendlyAuthMessage(FirebaseAuthException e) {
